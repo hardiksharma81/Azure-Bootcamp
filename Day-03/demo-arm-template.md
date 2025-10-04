@@ -194,3 +194,4 @@ NIC → attach subnet + public IP.
 VM → boot Ubuntu using NIC + disk.
 
 Outputs → show login details and IP.
+
