@@ -250,7 +250,7 @@ If port 80 (HTTP) is open for inbound traffic, Azure automatically allows the re
 
 This makes NSGs easier to manage and less error-prone than stateless firewalls.
 
-### 💡 What is the difference between Azure Firewall and NSG?
+### 💡 What is the difference between Azure Azure Application Gateway and Azure Load Balancer?
 
 **Answer:**
 
