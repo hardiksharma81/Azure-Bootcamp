@@ -164,3 +164,4 @@ When managing production VMs that must remain isolated from the internet, Bastio
 | Bastion          | N/A               | Secure browser-based VM access            |
 | Resource Group   | N/A               | Logical organization + RBAC               |
 | User Data        | Metadata Layer    | Persistent cloud config                    |
+
