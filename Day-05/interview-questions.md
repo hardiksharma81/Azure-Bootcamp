@@ -69,6 +69,109 @@ If port **80 (HTTP)** is open for inbound requests, the outbound response on por
 
 💡 **User Data** is the newer, more flexible version — think of it as *Custom Data 2.0*.
 
+# ⚙️ Azure Custom Data vs User Data
+
+Both are used to **initialize or configure a VM automatically** during provisioning — like bootstrapping scripts, cloud-init configs, or metadata injection.  
+
+But the **lifecycle and purpose** differ. 👇
+
+---
+
+## 🧾 1️⃣ Azure Custom Data
+
+🧩 **Definition:**  
+Custom Data is a **one-time** initialization mechanism that lets you pass data (like a script or configuration file) to a VM when it’s created.
+
+🧠 Think of it like a “setup script on first boot.”
+
+---
+
+### 🔹 Key Characteristics
+
+| Feature | Custom Data |
+|----------|--------------|
+| **Purpose** | Run initialization scripts during VM creation |
+| **Availability** | Only available during the **first boot** |
+| **Persistence** | ❌ **Ephemeral** – disappears after first boot |
+| **Access** | Stored temporarily in `/var/lib/waagent/CustomData` |
+| **Use Case** | Cloud-init, installing packages, setting up SSH keys |
+| **Update Capability** | Not updatable post-creation |
+
+---
+
+### 💡 Example Use Case
+
+You’re provisioning a VM and want to install Apache automatically:
+
+```bash
+#cloud-config
+packages:
+  - apache2
+runcmd:
+  - systemctl enable apache2
+  - systemctl start apache2
+You’d pass this file as custom data in Terraform or the Azure CLI:
+
+bash
+Copy code
+az vm create \
+  --name webserver01 \
+  --resource-group dev-rg \
+  --image UbuntuLTS \
+  --custom-data cloud-init.txt
+✅ Result: The script runs once when the VM boots for the first time.
+
+☁️ 2️⃣ Azure User Data
+🧩 Definition:
+User Data is a newer and enhanced version of Custom Data — it persists beyond the first boot and can be accessed and updated anytime via the Azure control plane or API.
+
+It’s like “Custom Data 2.0,” built for cloud-native automation.
+
+🔹 Key Characteristics
+Feature	User Data
+Purpose	Persist and store initialization or metadata info
+Availability	Accessible anytime, even after reboots
+Persistence	✅ Persistent in Azure
+Access	Retrieved via Azure Instance Metadata Service (IMDS)
+Use Case	Dynamic configuration, metadata tagging, post-deployment scripting
+Update Capability	Can be updated after VM creation
+
+💡 Example Use Case
+Suppose you deploy an app server fleet and want to:
+
+Pass the environment info (ENV=prod)
+
+Or dynamically update bootstrap metadata (like new API endpoints)
+
+You can set it like:
+
+bash
+Copy code
+az vm user-data set \
+  --resource-group prod-rg \
+  --name appserver01 \
+  --data '{"ENV":"production"}'
+Then inside the VM:
+
+bash
+Copy code
+curl -H Metadata:true http://169.254.169.254/metadata/instance/compute/userData?api-version=2021-02-01
+This returns the User Data payload — even after reboots. ⚡
+```
+## 🧠 Quick Comparison Table
+
+| Feature             | Custom Data                       | User Data                          |
+|--------------------|----------------------------------|-----------------------------------|
+| **Purpose**         | One-time setup at first boot      | Persistent, updatable metadata    |
+| **Lifecycle**       | Only during first boot            | Available anytime                  |
+| **Storage**         | Ephemeral                         | Persistent in Azure                |
+| **Use Case**        | Initial VM provisioning           | Dynamic configuration, updates     |
+| **Access Post Boot**| ❌ No                             | ✅ Yes                             |
+| **Supported OS**    | Linux & Windows                   | Initially Linux (expanding to Windows) |
+| **Introduced**      | Legacy mechanism                  | Newer, modern replacement          |
+
+
+
 ---
 
 ## 🌉 7. What is the difference between Azure Application Gateway and Azure Load Balancer?
